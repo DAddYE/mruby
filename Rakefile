@@ -12,7 +12,7 @@ MAKE = ENV['MAKE'] || 'make'
 MRUBY_ROOT = ENV['MRUBY_ROOT'] || File.expand_path(File.dirname(__FILE__))
 
 # by default GEMs are deactivated
-ENABLE_GEMS = ENV['ENABLE_GEMS'] == 'true'
+ENABLE_GEMS = !!ENV['ENABLE_GEMS']
 
 # the default file which contains the active GEMs
 ACTIVE_GEMS = ENV['ACTIVE_GEMS'] || File.join(MRUBY_ROOT, '/mrbgems/GEMS.active')
@@ -31,11 +31,10 @@ when 'small'
   CFLAGS = ['-Os']
 else  # including 'debug'
   e = ENV['CFLAGS']
-  CFLAGS = if e then [e] else ['-g', '-O3'] end
+  CFLAGS = e ? [e] : ['-g', '-O3']
 end
 LDFLAGS = [ENV['LDFLAGS']]
 LIBS    = [ENV['LIBS'] || '-lm']
-
 
 CFLAGS << "-DDISABLE_GEMS" unless ENABLE_GEMS
 CFLAGS << "-Wall" << "-Werror-implicit-function-declaration" << "-I#{MRUBY_ROOT}/include"
@@ -50,9 +49,9 @@ end
 ##############################
 # internal variables
 
-CP = ENV['CP'] ||= 'cp'
-RM_F = ENV['RM_F'] ||= 'rm -f'
-CAT = ENV['CAT'] ||= 'cat'
+CP   = ENV['CP']   || 'cp'
+RM_F = ENV['RM_F'] || 'rm -f'
+CAT  = ENV['CAT']  || 'cat'
 
 
 ##############################
