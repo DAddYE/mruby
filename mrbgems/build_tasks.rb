@@ -1,14 +1,14 @@
 MRBGEMS_PATH = File.dirname(__FILE__)
 
-GEM_INIT = "#{MRBGEMS_PATH}/gem_init"
-GEM_MAKEFILE = "#{MRBGEMS_PATH}/g/Makefile"
+GEM_INIT          = "#{MRBGEMS_PATH}/gem_init"
+GEM_MAKEFILE      = "#{MRBGEMS_PATH}/g/Makefile"
 GEM_MAKEFILE_LIST = "#{MRBGEMS_PATH}/g/MakefileGemList"
-MAKEFILE_4_GEM = "#{MRUBY_ROOT}/mrbgems/Makefile4gem"
+MAKEFILE_4_GEM    = "#{MRUBY_ROOT}/mrbgems/Makefile4gem"
 
 if ENV['OS'] == 'Windows_NT'
-GEM_MAKE_FLAGS = "#{MAKE_FLAGS} MAKEFILE_4_GEM=\"#{MAKEFILE_4_GEM}\""
+  GEM_MAKE_FLAGS = "#{MAKE_FLAGS} MAKEFILE_4_GEM=\"#{MAKEFILE_4_GEM}\""
 else
-GEM_MAKE_FLAGS = "#{MAKE_FLAGS} MAKEFILE_4_GEM='#{MAKEFILE_4_GEM}'"
+  GEM_MAKE_FLAGS = "#{MAKE_FLAGS} MAKEFILE_4_GEM='#{MAKEFILE_4_GEM}'"
 end
 
 task :mrbgems_all => ["#{GEM_INIT}.a", :mrbgems_generate_gem_makefile_list] do
@@ -42,7 +42,7 @@ end
 file "#{GEM_INIT}.c" do |t|
   puts "Generate Gem driver: #{t.name}"
   open(t.name, 'w') do |f|
-    f.puts <<__EOF__
+    f.puts <<-EOF
 /*
  * This file contains a list of all
  * initializing methods which are
@@ -61,16 +61,16 @@ void
 mrb_init_mrbgems(mrb_state *mrb) {
 #{for_each_gem{|path, gemname, escaped_gemname| "  GENERATED_TMP_mrb_%s_gem_init(mrb);" % [escaped_gemname]}}
 }
-__EOF__
+    EOF
   end
 end
 
 def for_each_gem(&block)
   IO.readlines(ACTIVE_GEMS).map { |line|
     path = line.chomp
-    if not File.exist?(path)
-      path2 = File.join MRUBY_ROOT, 'mrbgems', 'g', path
-      path = path2 if File.exist? path2
+    unless File.exist?(path)
+      path2 = File.join(MRUBY_ROOT, 'mrbgems', 'g', path)
+      path  = path2 if File.exist?(path2)
     end
     gemname = File.basename(path)
     escaped_gemname = gemname.gsub(/-/, '_')
@@ -80,13 +80,13 @@ end
 
 task :mrbgems_generate_gem_makefile_list do
   open(GEM_MAKEFILE_LIST, 'w') do |f|
-    f.puts <<__EOF__
+    f.puts <<-EOF
 GEM_LIST := #{for_each_gem{|path, gemname| "#{path}/mrb-#{gemname}-gem.a "}}
 
 GEM_ARCHIVE_FILES := #{MRUBY_ROOT}/mrbgems/gem_init.a
 GEM_ARCHIVE_FILES += $(GEM_LIST)
 
 GEM_INCLUDE_LIST := #{for_each_gem{|path, gemname| "-I#{path}/include "}}
-__EOF__
+    EOF
   end
 end
